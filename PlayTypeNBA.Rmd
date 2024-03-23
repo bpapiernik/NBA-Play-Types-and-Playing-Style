@@ -1,0 +1,4625 @@
+---
+title: "NBA Shot Type"
+author: "Brian Papiernik"
+date: "2024-02-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(nbastatR)
+library(hoopR)
+library(dplyr)
+library(tidyverse)
+```
+
+
+```{r}
+# install.packages("randomForest")
+# install.packages("rpart")
+# install.packages("caret")
+library(randomForest) # Load randomForest package to run bagging
+library(rpart) # Load rpart for decision trees
+library(caret) # Used for analysing results
+#install.packages("splitstackshape")
+library(splitstackshape) # Used for stratified sampling
+#install.packages("xgboost")
+#install.packages("caret")
+#install.packages("ggplot2")
+#library(devtools) 
+#install.packages("githubinstall")
+library(devtools)
+#install_github("AppliedDataSciencePartners/xgboostExplainer")
+#install.packages("SHAPforxgboost")
+#install.packages("GGally")
+#install.packages("gh")
+
+library(xgboost) # Load XGBoost
+library(caret) # Load Caret
+library(ggplot2) # Load ggplot2
+library(pROC) # Load proc
+library(SHAPforxgboost) # Load shap for XGBoost
+library(caTools)
+library(dplyr)
+library(GGally)
+library(ggplot2) # Load ggplot2
+library(pROC) # Load proc
+library(data.table)
+library(gh)
+library(commonmark)
+library(xgboostExplainer)
+library(dplyr)
+```
+
+
+```{r}
+contract_stats <- read.csv("NBAcontracts.csv")
+contract_stats2023 <- read.csv("playercontracts2023.csv")
+contract_stats2022 <- read.csv("playercontracts2022.csv")
+```
+
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Isolation",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Iso2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Isolation",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Iso2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Isolation",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Iso2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Isolation",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeIso2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Isolation",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeIso2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Isolation",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeIso2021 <- result$SynergyPlayType
+```
+
+
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Transition",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Transition2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Transition",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Transition2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Transition",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Transition2021 <- result$SynergyPlayType
+```
+
+
+
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRBallHandler",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+PRBH2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRBallHandler",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+PRBH2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRBallHandler",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+PRBH2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRBallHandler",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePRBH2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRBallHandler",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePRBH2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRBallHandler",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePRBH2021 <- result$SynergyPlayType
+```
+
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRRollman",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+PRR2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRRollman",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+PRR2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRRollman",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+PRR2021 <- result$SynergyPlayType
+```
+
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRRollman",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePRR2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRRollman",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePRR2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "PRRollman",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePRR2021 <- result$SynergyPlayType
+```
+
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Postup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Post2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Postup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Post2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Postup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Post2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Postup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePost2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Postup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePost2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Postup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DePost2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Spotup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Spot2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Spotup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Spot2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Spotup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Spot2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Spotup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeSpot2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Spotup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeSpot2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Spotup",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeSpot2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Handoff",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Hand2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Handoff",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Hand2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Handoff",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Hand2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Handoff",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeHand2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Handoff",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeHand2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Handoff",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeHand2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Cut",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Cut2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Cut",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Cut2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "Cut",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Cut2021 <- result$SynergyPlayType
+```
+
+
+
+
+
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffScreen",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+OffScreen2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffScreen",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Offscreen2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffScreen",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+Offscreen2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffScreen",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeOffScreen2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffScreen",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeOffscreen2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffScreen",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Defensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+DeOffscreen2021 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffRebound",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+OffReb2023 <- result$SynergyPlayType
+```
+
+```{r}
+
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffRebound",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+OffReb2022 <- result$SynergyPlayType
+```
+
+```{r}
+
+Sys.setenv(VROOM_CONNECTION_SIZE = 262144)  # Adjust the value as needed
+
+
+
+result <- nba_synergyplaytypes(
+  league_id = "00",
+  per_mode = "PerGame",
+  play_type = "OffRebound",
+  player_or_team = "P",
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_type = "Regular Season",
+  type_grouping = "Offensive")
+
+# Print the result
+print(result)
+
+
+# Print the result for all players
+OffReb2021 <- result$SynergyPlayType
+```
+
+# Tracking
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "SpeedDistance" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Speed2023 <- nba$LeagueDashPtStats 
+
+Speed2023 <- Speed2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "SpeedDistance" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Speed2022 <- nba$LeagueDashPtStats
+
+Speed2022 <- Speed2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "SpeedDistance" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Speed2021 <- nba$LeagueDashPtStats
+
+Speed2021 <- Speed2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Rebounding" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Reb2023 <- nba$LeagueDashPtStats
+
+Reb2023 <- Reb2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Rebounding" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Reb2022 <- nba$LeagueDashPtStats
+
+Reb2022 <- Reb2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Rebounding" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Reb2021 <- nba$LeagueDashPtStats
+
+Reb2021 <- Reb2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "CatchShoot" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+CatchShoot2023 <- nba$LeagueDashPtStats
+
+CatchShoot2023 <- CatchShoot2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "CatchShoot" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+CatchShoot2022 <- nba$LeagueDashPtStats
+
+CatchShoot2022 <- CatchShoot2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "CatchShoot" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+CatchShoot2021 <- nba$LeagueDashPtStats
+
+CatchShoot2021 <- CatchShoot2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Passing" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Pass2023 <- nba$LeagueDashPtStats
+
+Pass2023 <- Pass2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Passing" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Pass2022 <- nba$LeagueDashPtStats
+
+Pass2022 <- Pass2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Passing" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Pass2021 <- nba$LeagueDashPtStats
+
+Pass2021 <- Pass2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Drives" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Drives2023 <- nba$LeagueDashPtStats
+
+Drives2023 <- Drives2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Drives" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Drives2022 <- nba$LeagueDashPtStats
+
+Drives2022 <- Drives2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Drives" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Drives2021 <- nba$LeagueDashPtStats
+
+Drives2021 <- Drives2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PullUpShot" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PullShoot2023 <- nba$LeagueDashPtStats
+
+PullShoot2023 <- PullShoot2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PullUpShot" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PullShoot2022 <- nba$LeagueDashPtStats
+
+PullShoot2022 <- PullShoot2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PullUpShot" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PullShoot2021 <- nba$LeagueDashPtStats
+
+PullShoot2021 <- PullShoot2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "ElbowTouch" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Elbow2023 <- nba$LeagueDashPtStats
+
+Elbow2023 <- Elbow2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "ElbowTouch" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Elbow2022 <- nba$LeagueDashPtStats
+
+Elbow2022 <- Elbow2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "ElbowTouch" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Elbow2021 <- nba$LeagueDashPtStats
+
+Elbow2021 <- Elbow2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PostTouch" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PostTouch2023 <- nba$LeagueDashPtStats
+
+PostTouch2023 <- PostTouch2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PostTouch" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PostTouch2022 <- nba$LeagueDashPtStats
+
+PostTouch2022 <- PostTouch2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PostTouch" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PostTouch2021 <- nba$LeagueDashPtStats
+
+PostTouch2021 <- PostTouch2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PaintTouch" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PaintTouch2023 <- nba$LeagueDashPtStats
+
+PaintTouch2023 <- PaintTouch2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PaintTouch" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PaintTouch2022 <- nba$LeagueDashPtStats
+
+PaintTouch2022 <- PaintTouch2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "PaintTouch" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+PaintTouch2021 <- nba$LeagueDashPtStats
+
+PaintTouch2021 <- PaintTouch2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Efficiency" ,
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Eff2023 <- nba$LeagueDashPtStats
+
+Eff2023 <- Eff2023 %>%
+  mutate(SEASON_ID = 22022)
+```
+
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Efficiency" ,
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Eff2022 <- nba$LeagueDashPtStats
+
+Eff2022 <- Eff2022 %>%
+  mutate(SEASON_ID = 22021)
+```
+
+```{r}
+nba <- nba_leaguedashptstats(
+  college = "",
+  conference = "",
+  country = "",
+  date_from = "",
+  date_to = "",
+  division = "",
+  draft_pick = "",
+  draft_year = "",
+  game_scope = "",
+  height = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = 0,
+  opponent_team_id = 0,
+  outcome = "",
+  po_round = "",
+  per_mode = "PerGame",
+  period = "",
+  player_experience = "",
+  player_or_team = "Player",
+  player_position = "",
+  pt_measure_type = "Efficiency" ,
+  season = year_to_season(most_recent_nba_season() - 4),
+  season_segment = "",
+  season_type = "Regular Season",
+  starter_bench = "",
+  team_id = "",
+  vs_conference = "",
+  vs_division = "",
+  weight = "",
+  
+)
+
+Eff2021 <- nba$LeagueDashPtStats
+
+Eff2021 <- Eff2021 %>%
+  mutate(SEASON_ID = 22020)
+```
+
+
+# Combine all 3 years
+
+```{r}
+CatchShootTotal <- rbind(CatchShoot2021, CatchShoot2022, CatchShoot2023)
+CutTotal <- rbind(Cut2021, Cut2022, Cut2023)
+DeHandTotal <- rbind(DeHand2021, DeHand2022, DeHand2023)
+DeIsoTotal <- rbind(DeIso2021, DeIso2022, DeIso2023)
+DeOffScreenTotal <- rbind(DeOffscreen2021, DeOffscreen2022, DeOffScreen2023)
+DePostTotal <- rbind(DePost2021, DePost2022, DePost2023)
+DePRBHTotal <- rbind(DePRBH2021, DePRBH2022, DePRBH2023)
+DePRRTotal <- rbind(DePRR2021, DePRR2022, DePRR2023)
+DeSpotTotal <- rbind(DeSpot2021, DeSpot2022, DeSpot2023)
+DrivesTotal <- rbind(Drives2021, Drives2022, Drives2023)
+EffTotal <- rbind(Eff2021, Eff2022, Eff2023)
+ElbowTotal <- rbind(Elbow2021, Elbow2022, Elbow2023)
+HandTotal <- rbind(Hand2021, Hand2022, Hand2023)
+IsoTotal <- rbind(Iso2021, Iso2022, Iso2023)
+OffRebTotal <- rbind(OffReb2021, OffReb2022, OffReb2023)
+OffScreenTotal <- rbind(Offscreen2021, Offscreen2022, OffScreen2023)
+PaintTouchTotal <- rbind(PaintTouch2021, PaintTouch2022, PaintTouch2023)
+PassTotal <- rbind(Pass2021, Pass2022, Pass2023)
+PostTotal <- rbind(Post2021, Post2022, Post2023)
+PostTouchTotal <- rbind(PostTouch2021, PostTouch2022, PostTouch2023)
+PRBHTotal <- rbind(PRBH2021, PRBH2022, PRBH2023)
+PRRTotal <- rbind(PRR2021, PRR2022, PRR2023)
+RebTotal <- rbind(Reb2021, Reb2022, Reb2023)
+SpeedTotal <- rbind(Speed2021, Speed2022, Speed2023)
+SpotTotal <- rbind(Spot2021, Spot2022, Spot2023)
+TransitionTotal <- rbind(Transition2021, Transition2022, Transition2023)
+PullShootTotal <- rbind(PullShoot2021, PullShoot2022, PullShoot2023)
+```
+
+
+
+```{r}
+SpeedTotal[, 5:16] <- data.frame(lapply(SpeedTotal[, 5:16], as.numeric))
+PullShootTotal[, 5:16] <- data.frame(lapply(PullShootTotal[, 5:16], as.numeric))
+CatchShootTotal[, 5:16] <- data.frame(lapply(CatchShootTotal[, 5:16], as.numeric))
+CutTotal[,c(1,9:24)] <- data.frame(lapply(CutTotal[,c(1,9:24)], as.numeric))
+DeHandTotal[,c(1,9:24)] <- data.frame(lapply(DeHandTotal[,c(1,9:24)], as.numeric))
+DeIsoTotal[,c(1,9:24)] <- data.frame(lapply(DeIsoTotal[,c(1,9:24)], as.numeric))
+DeOffScreenTotal[,c(1,9:24)] <- data.frame(lapply(DeOffScreenTotal[,c(1,9:24)], as.numeric))
+DePostTotal[,c(1,9:24)] <- data.frame(lapply(DePostTotal[,c(1,9:24)], as.numeric))
+DePRBHTotal[,c(1,9:24)] <- data.frame(lapply(DePRBHTotal[,c(1,9:24)], as.numeric))
+DePRRTotal[,c(1,9:24)] <- data.frame(lapply(DePRRTotal[,c(1,9:24)], as.numeric))
+DeSpotTotal[,c(1,9:24)] <- data.frame(lapply(DeSpotTotal[,c(1,9:24)], as.numeric))
+DrivesTotal[, 5:25] <- data.frame(lapply(DrivesTotal[, 5:25], as.numeric))
+EffTotal[, 5:22] <- data.frame(lapply(EffTotal[, 5:22], as.numeric))
+ElbowTotal[, 5:26] <- data.frame(lapply(ElbowTotal[, 5:26], as.numeric))
+HandTotal[,c(1,9:24)] <- data.frame(lapply(HandTotal[,c(1,9:24)], as.numeric))
+IsoTotal[,c(1,9:24)] <- data.frame(lapply(IsoTotal[,c(1,9:24)], as.numeric))
+OffRebTotal[,c(1,9:24)] <- data.frame(lapply(OffRebTotal[,c(1,9:24)], as.numeric))
+OffScreenTotal[,c(1,9:24)] <- data.frame(lapply(OffScreenTotal[,c(1,9:24)], as.numeric))
+PaintTouchTotal[, 5:26] <- data.frame(lapply(PaintTouchTotal[, 5:26], as.numeric))
+PassTotal[, 5:18] <- data.frame(lapply(PassTotal[, 5:18], as.numeric))
+PostTotal[,c(1,9:24)] <- data.frame(lapply(PostTotal[,c(1,9:24)], as.numeric))
+PostTouchTotal[, 5:26] <- data.frame(lapply(PostTouchTotal[, 5:26], as.numeric))
+PRBHTotal[,c(1,9:24)] <- data.frame(lapply(PRBHTotal[,c(1,9:24)], as.numeric))
+PRRTotal[,c(1,9:24)] <- data.frame(lapply(PRRTotal[,c(1,9:24)], as.numeric))
+RebTotal[, 5:35] <- data.frame(lapply(RebTotal[, 5:35], as.numeric))
+SpotTotal[,c(1,9:24)] <- data.frame(lapply(SpotTotal[,c(1,9:24)], as.numeric))
+TransitionTotal[,c(1,9:24)] <- data.frame(lapply(TransitionTotal[,c(1,9:24)], as.numeric))
+
+```
+
+
+```{r}
+
+Total_tracking <- SpeedTotal %>%
+  left_join(PullShootTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION", "GP", "W", "L", "MIN")) %>%
+  left_join(CatchShootTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION", "GP", "W", "L", "MIN")) %>%
+  left_join(DrivesTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION", "GP", "W", "L", "MIN")) %>%
+  left_join(ElbowTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION", "GP", "W", "L", "MIN")) %>%
+  left_join(PaintTouchTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION", "GP", "W", "L", "MIN")) %>%
+  left_join(PassTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION", "GP", "W", "L", "MIN")) %>%
+  left_join(PostTouchTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION", "GP", "W", "L", "MIN")) %>%
+  left_join(RebTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_ABBREVIATION", "GP", "W", "L", "MIN"))
+
+```
+
+
+```{r}
+CutTotal <- CutTotal %>%
+  rename_with(~paste0("Cut", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+DeHandTotal <- DeHandTotal %>%
+  rename_with(~paste0("DefHandoff", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+DeIsoTotal<- DeIsoTotal %>%
+  rename_with(~paste0("DeIso", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+DeOffScreenTotal <- DeOffScreenTotal %>%
+  rename_with(~paste0("DefOffScreen", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+DePostTotal <- DePostTotal %>%
+  rename_with(~paste0("DefPost", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+DePRBHTotal <- DePRBHTotal %>%
+  rename_with(~paste0("DefPRBH", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+DePRRTotal <- DePRRTotal %>%
+  rename_with(~paste0("DefPRR", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+DeSpotTotal<- DeSpotTotal %>%
+  rename_with(~paste0("DefSpotUp", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+HandTotal<- HandTotal %>%
+  rename_with(~paste0("Handoff", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+IsoTotal <- IsoTotal %>%
+  rename_with(~paste0("Iso", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+OffRebTotal <- OffRebTotal %>%
+  rename_with(~paste0("OffReb", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+OffScreenTotal <- OffScreenTotal %>%
+  rename_with(~paste0("OffScreen", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+PostTotal <- PostTotal %>%
+  rename_with(~paste0("Post", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+PRBHTotal <- PRBHTotal %>%
+  rename_with(~paste0("PRBH", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+PRRTotal <- PRRTotal %>%
+  rename_with(~paste0("PRR", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+SpotTotal <- SpotTotal %>%
+  rename_with(~paste0("Spot", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+
+TransitionTotal <- TransitionTotal %>%
+  rename_with(~paste0("Transition", .), .cols = 9:24) %>%
+  select(,-c(4:8,10)) %>%
+  group_by(PLAYER_ID, SEASON_ID, PLAYER_NAME) %>%
+  summarize(across(everything(), mean, na.rm = TRUE))
+```
+
+
+```{r}
+Total_Playtype <- CutTotal %>%
+  left_join(DeHandTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(DeIsoTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(DeOffScreenTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME"))  %>%
+  left_join(DePostTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(DePRBHTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(DePRRTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(DeSpotTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME"))  %>%
+  left_join(HandTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(IsoTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(OffRebTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(OffScreenTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(PostTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(PRBHTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(PRRTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME"))  %>%
+  left_join(SpotTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME")) %>%
+  left_join(TransitionTotal, by = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME"))   
+  
+```
+
+```{r}
+Tracking_playtype <- full_join(Total_tracking, Total_Playtype, by = c("PLAYER_ID" = "PLAYER_ID", "SEASON_ID" = "SEASON_ID", "PLAYER_NAME" = "PLAYER_NAME"))
+
+```
+
+```{r}
+contract_stats <- contract_stats %>%
+  select(Player, Tm, X2023.24) %>%
+  rename(Team = Tm, 
+         Year_2324 = X2023.24)
+
+contract_stats2022 <- contract_stats2022 %>%
+  select(Player, X2021.22) %>%
+  rename(Year_2122 = X2021.22)
+
+contract_stats2023 <- contract_stats2023 %>%
+  select(Player, X2022.23) %>%
+  rename(Year_2223 = X2022.23)
+```
+
+```{r}
+
+library(stringr)
+
+contract_stats <- contract_stats %>%
+  mutate(Year_2324 = sapply(str_extract_all(Year_2324, '[[:digit:]]+'), function(x) as.numeric(paste(x, collapse = ''))))
+
+contract_stats2022 <- contract_stats2022 %>%
+  mutate(Year_2122 = sapply(str_extract_all(Year_2122, '[[:digit:]]+'), function(x) as.numeric(paste(x, collapse = ''))))
+
+contract_stats2023 <- contract_stats2023 %>%
+  mutate(Year_2223 = sapply(str_extract_all(Year_2223, '[[:digit:]]+'), function(x) as.numeric(paste(x, collapse = ''))))
+
+```
+
+```{r}
+contract_stats <- contract_stats %>%
+  distinct(Player, .keep_all = TRUE)
+
+contract_stats2022 <- contract_stats2022 %>%
+  distinct(Player, .keep_all = TRUE)
+
+contract_stats2023 <- contract_stats2023 %>%
+  distinct(Player, .keep_all = TRUE)
+
+```
+
+```{r}
+contract_stats <- contract_stats %>%
+  mutate(SEASON_ID = 22022) %>%
+  rename(Salary = Year_2324)
+
+contract_stats2022 <- contract_stats2022 %>%
+  mutate(SEASON_ID = 22020) %>%
+  rename(Salary = Year_2122)
+
+contract_stats2023 <- contract_stats2023 %>%
+  mutate(SEASON_ID = 22021)  %>%
+  rename(Salary = Year_2223)
+```
+
+
+```{r}
+contract_stats <- contract_stats %>%
+  select(-c(Team))
+```
+
+```{r}
+total_contract <- rbind(contract_stats, contract_stats2022, contract_stats2023)
+```
+
+```{r}
+final_contract_tracking_playtype <- merge(Tracking_playtype, total_contract, 
+                              by.x = c("PLAYER_NAME", "SEASON_ID"), 
+                              by.y = c("Player", "SEASON_ID"), 
+                              all.x = FALSE, all.y = FALSE)
+
+```
+
+```{r}
+final_contract_tracking_playtype <- final_contract_tracking_playtype %>%
+  select(1:4, Salary, everything())
+head(final_contract_tracking_playtype)
+
+final_contract_tracking_playtype <- final_contract_tracking_playtype[!is.na(final_contract_tracking_playtype$Salary), ]
+```
+
+```{r}
+set.seed(11111)
+sample <- sample.split(final_contract_tracking_playtype$Salary, SplitRatio = 0.7)
+nba_train  <- subset(final_contract_tracking_playtype, sample == TRUE)
+nba_test   <- subset(final_contract_tracking_playtype, sample == FALSE)
+
+summary(nba_train$Salary)
+summary(nba_test$Salary)
+
+
+```
+
+```{r}
+dtrain <- xgb.DMatrix(data = as.matrix(nba_train[,c(16:397)]), label = as.numeric(nba_train$Salary))
+
+# Create test matrix
+
+
+
+dtest <-  xgb.DMatrix(data = as.matrix(nba_test[,c(16:397)]), label = as.numeric(nba_test$Salary))
+```
+
+```{r}
+set.seed(111111)
+bst_1 <- xgboost(data = dtrain, # Set training data
+               
+               nrounds = 100, # Set number of rounds
+               
+               verbose = 1, # 1 - Prints out fit
+                print_every_n = 20) # Prints out result every 20th iteration
+```
+
+```{r}
+set.seed(111111)
+bst <- xgb.cv(data = dtrain, # Set training data
+              
+              nfold = 5, # Use 5 fold cross-validation
+               
+               eta = 0.1, # Set learning rate
+              
+               nrounds = 1000, # Set number of rounds
+               early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+               
+               verbose = 1, # 1 - Prints out fit
+               nthread = 1, # Set number of parallel threads
+               print_every_n = 20) # Prints out result every 20th iteration
+```
+
+From this we see 77 was the optimal number of iterations for our model. We use this number solely to ensure that we are doing a sufficient amount of rounds for our next tuning stages. We will set the number of iterations to 100 and include an early stop parameter of 20 for our next round of tuning.
+
+```{r}
+max_depth_vals <- c(3, 5, 7, 10, 15) # Create vector of max depth values
+min_child_weight <- c(1,3,5,7, 10, 15) # Create vector of min child values
+
+# Expand grid of parameter values
+cv_params <- expand.grid(max_depth_vals, min_child_weight)
+names(cv_params) <- c("max_depth", "min_child_weight")
+# Create results vector
+rmse_vec  <- rep(NA, nrow(cv_params)) 
+# Loop through results
+for(i in 1:nrow(cv_params)){
+  set.seed(111111)
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = cv_params$max_depth[i], # Set max depth
+                     min_child_weight = cv_params$min_child_weight[i], # Set minimum number of samples in node to split
+                     
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+                     
+  ) # Set evaluation metric to use
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+Best is 49:
+
+```{r}
+# Join results in dataset
+res_db <- cbind.data.frame(cv_params, rmse_vec)
+names(res_db)[3] <- c("rmse") 
+res_db$max_depth <- as.factor(res_db$max_depth) # Convert tree number to factor for plotting
+res_db$min_child_weight <- as.factor(res_db$min_child_weight) # Convert node size to factor for plotting
+# Print AUC heatmap
+g_2 <- ggplot(res_db, aes(y = max_depth, x = min_child_weight, fill = rmse)) + # set aesthetics
+  geom_tile() + # Use geom_tile for heatmap
+  theme_bw() + # Set theme
+  scale_fill_gradient2(low = "blue", # Choose low color
+                       mid = "white", # Choose mid color
+                       high = "red", # Choose high color
+                       midpoint =mean(res_db$rmse), # Choose mid point
+                       space = "Lab", 
+                       na.value ="grey", # Choose NA value
+                       guide = "colourbar", # Set color bar
+                       aesthetics = "fill") + # Select aesthetics to apply
+  labs(x = "Minimum Child Weight", y = "Max Depth", fill = "RMSE") # Set labels
+g_2 # Generate plot
+```
+
+```{r}
+res_db[which.min(res_db$rmse),] 
+```
+
+```{r}
+gamma_vals <- c(0, 0.05, 0.1, 0.15, 0.2) # Create vector of gamma values
+
+# Be Careful - This can take a very long time to run
+set.seed(111111)
+rmse_vec  <- rep(NA, length(gamma_vals))
+for(i in 1:length(gamma_vals)){
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = 3, # Set max depth
+                     min_child_weight = 10, # Set minimum number of samples in node to split
+                     gamma = gamma_vals[i], # Set minimum loss reduction for split
+                     
+                     
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+  ) # Set evaluation metric to use
+  
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+best 164
+
+
+```{r}
+cbind.data.frame(gamma_vals, rmse_vec)
+```
+
+```{r}
+###### 3 - Subsample and Column sample Tuning ######
+
+# Be Careful - This can take a very long time to run
+subsample <- c(0.6, 0.7, 0.8, 0.9, 1) # Create vector of subsample values
+colsample_by_tree <- c(0.6, 0.7, 0.8, 0.9, 1) # Create vector of col sample values
+
+# Expand grid of tuning parameters
+cv_params <- expand.grid(subsample, colsample_by_tree)
+names(cv_params) <- c("subsample", "colsample_by_tree")
+# Create vectors to store results
+rmse_vec <- rep(NA, nrow(cv_params)) 
+# Loop through parameter values
+for(i in 1:nrow(cv_params)){
+  set.seed(111111)
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = 3, # Set max depth
+                     min_child_weight = 10, # Set minimum number of samples in node to split
+                     gamma = 0.0, # Set minimum loss reduction for split
+                     subsample = cv_params$subsample[i], # Set proportion of training data to use in tree
+                     colsample_bytree = cv_params$colsample_by_tree[i], # Set number of variables to use in each tree
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+  ) # Set evaluation metric to use
+  
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+
+165
+
+```{r}
+res_db <- cbind.data.frame(cv_params, rmse_vec)
+names(res_db)[3] <- c("rmse") 
+res_db$subsample <- as.factor(res_db$subsample) # Convert tree number to factor for plotting
+res_db$colsample_by_tree <- as.factor(res_db$colsample_by_tree) # Convert node size to factor for plotting
+g_4 <- ggplot(res_db, aes(y = colsample_by_tree, x = subsample, fill = rmse)) + # set aesthetics
+  geom_tile() + # Use geom_tile for heatmap
+  theme_bw() + # Set theme
+  scale_fill_gradient2(low = "blue", # Choose low color
+                       mid = "white", # Choose mid color
+                       high = "red", # Choose high color
+                       midpoint =mean(res_db$rmse), # Choose mid point
+                       space = "Lab", 
+                       na.value ="grey", # Choose NA value
+                       guide = "colourbar", # Set color bar
+                       aesthetics = "fill") + # Select aesthetics to apply
+  labs(x = "Subsample", y = "Column Sample by Tree", fill = "RMSE") # Set labels
+g_4 # Generate plot
+```
+
+
+```{r}
+res_db
+```
+
+
+```{r}
+res_db[which.min(res_db$rmse),]
+```
+
+```{r}
+###### 4 - eta tuning ######
+
+# Use xgb.cv to run cross-validation inside xgboost
+set.seed(111111)
+bst_mod_1 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.3, # Set learning rate
+                    max.depth = 3, # Set max depth
+                    min_child_weight = 10, # Set minimum number of samples in node to split
+                    gamma = .0, # Set minimum loss reduction for split
+                    subsample = .9, # Set proportion of training data to use in tree
+                    colsample_bytree =  .9, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+```{r}
+set.seed(111111)
+bst_mod_2 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.1, # Set learning rate
+                    max.depth =  3, # Set max depth
+                    min_child_weight = 10, # Set minimum number of samples in node to split
+                    gamma = .0, # Set minimum loss reduction for split
+                    subsample = .9, # Set proportion of training data to use in tree
+                    colsample_bytree = .9, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+```{r}
+set.seed(111111)
+bst_mod_3 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.05, # Set learning rate
+                    max.depth = 3, # Set max depth
+                    min_child_weight = 10, # Set minimum number of samples in node to split
+                    gamma = .0, # Set minimum loss reduction for split
+                    subsample = .9 , # Set proportion of training data to use in tree
+                    colsample_bytree =  .9, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+
+```{r}
+set.seed(111111)
+bst_mod_4 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.01, # Set learning rate
+                    max.depth = 3, # Set max depth
+                    min_child_weight = 10, # Set minimum number of samples in node to split
+                    gamma = 0.0, # Set minimum loss reduction for split
+                    subsample = .9, # Set proportion of training data to use in tree
+                    colsample_bytree = .9, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+
+```{r}
+set.seed(111111)
+bst_mod_5 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.005, # Set learning rate
+                    max.depth = 3, # Set max depth
+                    min_child_weight = 10, # Set minimum number of samples in node to split
+                    gamma = .0, # Set minimum loss reduction for split
+                    subsample = .9 , # Set proportion of training data to use in tree
+                    colsample_bytree = .9, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+                    
+) # Set evaluation metric to use
+```
+
+```{r}
+# Extract results for model with eta = 0.3
+pd1 <- cbind.data.frame(bst_mod_1$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.3, nrow(bst_mod_1$evaluation_log)))
+names(pd1)[3] <- "eta"
+# Extract results for model with eta = 0.1
+pd2 <- cbind.data.frame(bst_mod_2$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.1, nrow(bst_mod_2$evaluation_log)))
+names(pd2)[3] <- "eta"
+# Extract results for model with eta = 0.05
+pd3 <- cbind.data.frame(bst_mod_3$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.05, nrow(bst_mod_3$evaluation_log)))
+names(pd3)[3] <- "eta"
+# Extract results for model with eta = 0.01
+pd4 <- cbind.data.frame(bst_mod_4$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.01, nrow(bst_mod_4$evaluation_log)))
+names(pd4)[3] <- "eta"
+# Extract results for model with eta = 0.005
+pd5 <- cbind.data.frame(bst_mod_5$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.005, nrow(bst_mod_5$evaluation_log)))
+names(pd5)[3] <- "eta"
+# Join datasets
+plot_data <- rbind.data.frame(pd1, pd2, pd3, pd4, pd5)
+# Converty ETA to factor
+plot_data$eta <- as.factor(plot_data$eta)
+# Plot points
+g_6 <- ggplot(plot_data, aes(x = iter, y = test_rmse_mean, color = eta))+
+  geom_point(alpha = 0.5) +
+  theme_bw() + # Set theme
+  theme(panel.grid.major = element_blank(), # Remove grid
+        panel.grid.minor = element_blank(), # Remove grid
+        panel.border = element_blank(), # Remove grid
+        panel.background = element_blank()) + # Remove grid 
+  labs(x = "Number of Trees", title = "RMSE v Number of Trees",
+       y = "RMSE", color = "Learning \n Rate")  # Set labels
+g_6
+```
+
+
+```{r}
+set.seed(111111)
+bst_final <- xgboost(data = dtrain, # Set training data
+                     
+                     
+                     
+                     eta = .1, # Set learning rate
+                     max.depth =  3, # Set max depth
+                     min_child_weight = 10, # Set minimum number of samples in node to split
+                     gamma = .0, # Set minimum loss reduction for split
+                     subsample = .9, # Set proportion of training data to use in tree
+                     colsample_bytree = .9 , # Set number of variables to use in each tree
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+                     
+) # Set evaluation metric to use
+```
+
+```{r}
+# Extract importance
+imp_mat <- xgb.importance(model = bst_final)
+# Plot importance (top 10 variables)
+xgb.plot.importance(imp_mat, top_n = 25)
+```
+
+
+```{r}
+nba1 <- nba_fantasywidget(
+  active_players = "N",
+  date_from = "",
+  date_to = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = "",
+  opponent_team_id = "",
+  po_round = "",
+  player_id = "",
+  position = "",
+  season = year_to_season(most_recent_nba_season() - 1),
+  season_segment = "",
+  season_type = "Regular Season",
+  team_id = "",
+  todays_opponent = 0,
+  todays_players = "N",
+  vs_conference = "",
+  vs_division = "",
+  
+)
+
+position2023 <- nba1$FantasyWidgetResult
+```
+
+```{r}
+nba1 <- nba_fantasywidget(
+  active_players = "N",
+  date_from = "",
+  date_to = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = "",
+  opponent_team_id = "",
+  po_round = "",
+  player_id = "",
+  position = "",
+  season = year_to_season(most_recent_nba_season() - 2),
+  season_segment = "",
+  season_type = "Regular Season",
+  team_id = "",
+  todays_opponent = 0,
+  todays_players = "N",
+  vs_conference = "",
+  vs_division = "",
+  
+)
+
+position2022 <- nba1$FantasyWidgetResult
+```
+
+```{r}
+nba1 <- nba_fantasywidget(
+  active_players = "N",
+  date_from = "",
+  date_to = "",
+  last_n_games = 0,
+  league_id = "00",
+  location = "",
+  month = "",
+  opponent_team_id = "",
+  po_round = "",
+  player_id = "",
+  position = "",
+  season = year_to_season(most_recent_nba_season() - 3),
+  season_segment = "",
+  season_type = "Regular Season",
+  team_id = "",
+  todays_opponent = 0,
+  todays_players = "N",
+  vs_conference = "",
+  vs_division = "",
+  
+)
+
+position2021 <- nba1$FantasyWidgetResult
+```
+
+```{r}
+position2023 <- position2023 %>%
+  select(PLAYER_ID, PLAYER_NAME, PLAYER_POSITION) %>%
+  mutate(SEASON_ID = 22022)
+
+position2022 <- position2022 %>%
+  select(PLAYER_ID, PLAYER_NAME, PLAYER_POSITION) %>%
+  mutate(SEASON_ID = 22021)
+
+position2021 <- position2021 %>%
+  select(PLAYER_ID, PLAYER_NAME, PLAYER_POSITION) %>%
+  mutate(SEASON_ID = 22020)
+```
+
+```{r}
+total_position <- rbind(position2023, position2022, position2021)
+```
+
+```{r}
+final_contract_tracking_playtype2 <- merge(final_contract_tracking_playtype, total_position, 
+                              by.x = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME"), 
+                              by.y = c("PLAYER_ID", "SEASON_ID", "PLAYER_NAME"), 
+                              all.x = TRUE, all.y = FALSE)
+```
+
+```{r}
+final_contract_tracking_playtype2 <- final_contract_tracking_playtype2 %>%
+  select(1:5, PLAYER_POSITION, everything())
+
+summary(final_contract_tracking_playtype2$PLAYER_POSITION)
+```
+# Guards
+
+```{r}
+guards <- final_contract_tracking_playtype2 %>%
+  filter(PLAYER_POSITION == "G" |PLAYER_POSITION == "G-F")
+```
+
+
+```{r}
+set.seed(11111)
+sample <- sample.split(guards$Salary, SplitRatio = 0.7)
+nba_train_guards  <- subset(guards, sample == TRUE)
+nba_test_guards   <- subset(guards, sample == FALSE)
+
+
+
+```
+
+```{r}
+dtrain <- xgb.DMatrix(data = as.matrix(nba_train_guards[,c(17:398)]), label = as.numeric(nba_train_guards$Salary))
+
+# Create test matrix
+
+
+
+dtest <-  xgb.DMatrix(data = as.matrix(nba_test_guards[,c(17:398)]), label = as.numeric(nba_test_guards$Salary))
+```
+
+
+```{r}
+set.seed(111111)
+bst_1 <- xgboost(data = dtrain, # Set training data
+               
+               nrounds = 100, # Set number of rounds
+               
+               verbose = 1, # 1 - Prints out fit
+                print_every_n = 20) # Prints out result every 20th iteration
+```
+
+```{r}
+set.seed(111111)
+bst <- xgb.cv(data = dtrain, # Set training data
+              
+              nfold = 5, # Use 5 fold cross-validation
+               
+               eta = 0.1, # Set learning rate
+              
+               nrounds = 1000, # Set number of rounds
+               early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+               
+               verbose = 1, # 1 - Prints out fit
+               nthread = 1, # Set number of parallel threads
+               print_every_n = 20) # Prints out result every 20th iteration
+```
+
+From this we see 77 was the optimal number of iterations for our model. We use this number solely to ensure that we are doing a sufficient amount of rounds for our next tuning stages. We will set the number of iterations to 100 and include an early stop parameter of 20 for our next round of tuning.
+
+```{r}
+max_depth_vals <- c(3, 5, 7, 10, 15) # Create vector of max depth values
+min_child_weight <- c(1,3,5,7, 10, 15) # Create vector of min child values
+
+# Expand grid of parameter values
+cv_params <- expand.grid(max_depth_vals, min_child_weight)
+names(cv_params) <- c("max_depth", "min_child_weight")
+# Create results vector
+rmse_vec  <- rep(NA, nrow(cv_params)) 
+# Loop through results
+for(i in 1:nrow(cv_params)){
+  set.seed(111111)
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = cv_params$max_depth[i], # Set max depth
+                     min_child_weight = cv_params$min_child_weight[i], # Set minimum number of samples in node to split
+                     
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+                     
+  ) # Set evaluation metric to use
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+Best is 49:
+
+```{r}
+# Join results in dataset
+res_db <- cbind.data.frame(cv_params, rmse_vec)
+names(res_db)[3] <- c("rmse") 
+res_db$max_depth <- as.factor(res_db$max_depth) # Convert tree number to factor for plotting
+res_db$min_child_weight <- as.factor(res_db$min_child_weight) # Convert node size to factor for plotting
+# Print AUC heatmap
+g_2 <- ggplot(res_db, aes(y = max_depth, x = min_child_weight, fill = rmse)) + # set aesthetics
+  geom_tile() + # Use geom_tile for heatmap
+  theme_bw() + # Set theme
+  scale_fill_gradient2(low = "blue", # Choose low color
+                       mid = "white", # Choose mid color
+                       high = "red", # Choose high color
+                       midpoint =mean(res_db$rmse), # Choose mid point
+                       space = "Lab", 
+                       na.value ="grey", # Choose NA value
+                       guide = "colourbar", # Set color bar
+                       aesthetics = "fill") + # Select aesthetics to apply
+  labs(x = "Minimum Child Weight", y = "Max Depth", fill = "RMSE") # Set labels
+g_2 # Generate plot
+```
+
+```{r}
+res_db[which.min(res_db$rmse),] 
+```
+
+```{r}
+gamma_vals <- c(0, 0.05, 0.1, 0.15, 0.2) # Create vector of gamma values
+
+# Be Careful - This can take a very long time to run
+set.seed(111111)
+rmse_vec  <- rep(NA, length(gamma_vals))
+for(i in 1:length(gamma_vals)){
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = 5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = gamma_vals[i], # Set minimum loss reduction for split
+                     
+                     
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+  ) # Set evaluation metric to use
+  
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+best 164
+
+
+```{r}
+cbind.data.frame(gamma_vals, rmse_vec)
+```
+
+```{r}
+###### 3 - Subsample and Column sample Tuning ######
+
+# Be Careful - This can take a very long time to run
+subsample <- c(0.6, 0.7, 0.8, 0.9, 1) # Create vector of subsample values
+colsample_by_tree <- c(0.6, 0.7, 0.8, 0.9, 1) # Create vector of col sample values
+
+# Expand grid of tuning parameters
+cv_params <- expand.grid(subsample, colsample_by_tree)
+names(cv_params) <- c("subsample", "colsample_by_tree")
+# Create vectors to store results
+rmse_vec <- rep(NA, nrow(cv_params)) 
+# Loop through parameter values
+for(i in 1:nrow(cv_params)){
+  set.seed(111111)
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = 5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = 0.0, # Set minimum loss reduction for split
+                     subsample = cv_params$subsample[i], # Set proportion of training data to use in tree
+                     colsample_bytree = cv_params$colsample_by_tree[i], # Set number of variables to use in each tree
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+  ) # Set evaluation metric to use
+  
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+
+165
+
+```{r}
+res_db <- cbind.data.frame(cv_params, rmse_vec)
+names(res_db)[3] <- c("rmse") 
+res_db$subsample <- as.factor(res_db$subsample) # Convert tree number to factor for plotting
+res_db$colsample_by_tree <- as.factor(res_db$colsample_by_tree) # Convert node size to factor for plotting
+g_4 <- ggplot(res_db, aes(y = colsample_by_tree, x = subsample, fill = rmse)) + # set aesthetics
+  geom_tile() + # Use geom_tile for heatmap
+  theme_bw() + # Set theme
+  scale_fill_gradient2(low = "blue", # Choose low color
+                       mid = "white", # Choose mid color
+                       high = "red", # Choose high color
+                       midpoint =mean(res_db$rmse), # Choose mid point
+                       space = "Lab", 
+                       na.value ="grey", # Choose NA value
+                       guide = "colourbar", # Set color bar
+                       aesthetics = "fill") + # Select aesthetics to apply
+  labs(x = "Subsample", y = "Column Sample by Tree", fill = "RMSE") # Set labels
+g_4 # Generate plot
+```
+
+
+```{r}
+res_db
+```
+
+
+```{r}
+res_db[which.min(res_db$rmse),]
+```
+
+```{r}
+###### 4 - eta tuning ######
+
+# Use xgb.cv to run cross-validation inside xgboost
+set.seed(111111)
+bst_mod_1 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.3, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .0, # Set minimum loss reduction for split
+                    subsample = .7, # Set proportion of training data to use in tree
+                    colsample_bytree =  .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+```{r}
+set.seed(111111)
+bst_mod_2 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.1, # Set learning rate
+                    max.depth =  5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .0, # Set minimum loss reduction for split
+                    subsample = .7, # Set proportion of training data to use in tree
+                    colsample_bytree = .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+```{r}
+set.seed(111111)
+bst_mod_3 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.05, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .0, # Set minimum loss reduction for split
+                    subsample = .7 , # Set proportion of training data to use in tree
+                    colsample_bytree =  .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+
+```{r}
+set.seed(111111)
+bst_mod_4 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.01, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = 0.0, # Set minimum loss reduction for split
+                    subsample = .7, # Set proportion of training data to use in tree
+                    colsample_bytree = .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+
+```{r}
+set.seed(111111)
+bst_mod_5 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.005, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .0, # Set minimum loss reduction for split
+                    subsample = .7 , # Set proportion of training data to use in tree
+                    colsample_bytree = .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+                    
+) # Set evaluation metric to use
+```
+
+```{r}
+# Extract results for model with eta = 0.3
+pd1 <- cbind.data.frame(bst_mod_1$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.3, nrow(bst_mod_1$evaluation_log)))
+names(pd1)[3] <- "eta"
+# Extract results for model with eta = 0.1
+pd2 <- cbind.data.frame(bst_mod_2$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.1, nrow(bst_mod_2$evaluation_log)))
+names(pd2)[3] <- "eta"
+# Extract results for model with eta = 0.05
+pd3 <- cbind.data.frame(bst_mod_3$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.05, nrow(bst_mod_3$evaluation_log)))
+names(pd3)[3] <- "eta"
+# Extract results for model with eta = 0.01
+pd4 <- cbind.data.frame(bst_mod_4$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.01, nrow(bst_mod_4$evaluation_log)))
+names(pd4)[3] <- "eta"
+# Extract results for model with eta = 0.005
+pd5 <- cbind.data.frame(bst_mod_5$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.005, nrow(bst_mod_5$evaluation_log)))
+names(pd5)[3] <- "eta"
+# Join datasets
+plot_data <- rbind.data.frame(pd1, pd2, pd3, pd4, pd5)
+# Converty ETA to factor
+plot_data$eta <- as.factor(plot_data$eta)
+# Plot points
+g_6 <- ggplot(plot_data, aes(x = iter, y = test_rmse_mean, color = eta))+
+  geom_point(alpha = 0.5) +
+  theme_bw() + # Set theme
+  theme(panel.grid.major = element_blank(), # Remove grid
+        panel.grid.minor = element_blank(), # Remove grid
+        panel.border = element_blank(), # Remove grid
+        panel.background = element_blank()) + # Remove grid 
+  labs(x = "Number of Trees", title = "RMSE v Number of Trees",
+       y = "RMSE", color = "Learning \n Rate")  # Set labels
+g_6
+```
+
+
+```{r}
+set.seed(111111)
+bst_final <- xgboost(data = dtrain, # Set training data
+                     
+                     
+                     
+                     eta = .1, # Set learning rate
+                     max.depth =  5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = .0, # Set minimum loss reduction for split
+                     subsample = .7, # Set proportion of training data to use in tree
+                     colsample_bytree = .6 , # Set number of variables to use in each tree
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+                     
+) # Set evaluation metric to use
+```
+
+```{r}
+# Extract importance
+imp_mat <- xgb.importance(model = bst_final)
+# Plot importance (top 10 variables)
+xgb.plot.importance(imp_mat, top_n = 25)
+```
+
+
+# Wings
+
+```{r}
+wings <- final_contract_tracking_playtype2 %>%
+  filter(PLAYER_POSITION == "F" |PLAYER_POSITION == "F-G")
+```
+
+
+
+```{r}
+set.seed(11111)
+sample <- sample.split(wings$Salary, SplitRatio = 0.7)
+nba_train_wings  <- subset(wings, sample == TRUE)
+nba_test_wings   <- subset(wings, sample == FALSE)
+
+
+
+
+```
+
+```{r}
+dtrain <- xgb.DMatrix(data = as.matrix(nba_train_wings[,c(17:398)]), label = as.numeric(nba_train_wings$Salary))
+
+# Create test matrix
+
+
+
+dtest <-  xgb.DMatrix(data = as.matrix(nba_test_wings[,c(17:398)]), label = as.numeric(nba_test_wings$Salary))
+```
+
+```{r}
+set.seed(111111)
+bst_1 <- xgboost(data = dtrain, # Set training data
+               
+               nrounds = 100, # Set number of rounds
+               
+               verbose = 1, # 1 - Prints out fit
+                print_every_n = 20) # Prints out result every 20th iteration
+```
+
+```{r}
+set.seed(111111)
+bst <- xgb.cv(data = dtrain, # Set training data
+              
+              nfold = 5, # Use 5 fold cross-validation
+               
+               eta = 0.1, # Set learning rate
+              
+               nrounds = 1000, # Set number of rounds
+               early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+               
+               verbose = 1, # 1 - Prints out fit
+               nthread = 1, # Set number of parallel threads
+               print_every_n = 20) # Prints out result every 20th iteration
+```
+
+From this we see 77 was the optimal number of iterations for our model. We use this number solely to ensure that we are doing a sufficient amount of rounds for our next tuning stages. We will set the number of iterations to 100 and include an early stop parameter of 20 for our next round of tuning.
+
+```{r}
+max_depth_vals <- c(3, 5, 7, 10, 15) # Create vector of max depth values
+min_child_weight <- c(1,3,5,7, 10, 15) # Create vector of min child values
+
+# Expand grid of parameter values
+cv_params <- expand.grid(max_depth_vals, min_child_weight)
+names(cv_params) <- c("max_depth", "min_child_weight")
+# Create results vector
+rmse_vec  <- rep(NA, nrow(cv_params)) 
+# Loop through results
+for(i in 1:nrow(cv_params)){
+  set.seed(111111)
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = cv_params$max_depth[i], # Set max depth
+                     min_child_weight = cv_params$min_child_weight[i], # Set minimum number of samples in node to split
+                     
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+                     
+  ) # Set evaluation metric to use
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+Best is 49:
+
+```{r}
+# Join results in dataset
+res_db <- cbind.data.frame(cv_params, rmse_vec)
+names(res_db)[3] <- c("rmse") 
+res_db$max_depth <- as.factor(res_db$max_depth) # Convert tree number to factor for plotting
+res_db$min_child_weight <- as.factor(res_db$min_child_weight) # Convert node size to factor for plotting
+# Print AUC heatmap
+g_2 <- ggplot(res_db, aes(y = max_depth, x = min_child_weight, fill = rmse)) + # set aesthetics
+  geom_tile() + # Use geom_tile for heatmap
+  theme_bw() + # Set theme
+  scale_fill_gradient2(low = "blue", # Choose low color
+                       mid = "white", # Choose mid color
+                       high = "red", # Choose high color
+                       midpoint =mean(res_db$rmse), # Choose mid point
+                       space = "Lab", 
+                       na.value ="grey", # Choose NA value
+                       guide = "colourbar", # Set color bar
+                       aesthetics = "fill") + # Select aesthetics to apply
+  labs(x = "Minimum Child Weight", y = "Max Depth", fill = "RMSE") # Set labels
+g_2 # Generate plot
+```
+
+```{r}
+res_db[which.min(res_db$rmse),] 
+```
+
+```{r}
+gamma_vals <- c(0, 0.05, 0.1, 0.15, 0.2) # Create vector of gamma values
+
+# Be Careful - This can take a very long time to run
+set.seed(111111)
+rmse_vec  <- rep(NA, length(gamma_vals))
+for(i in 1:length(gamma_vals)){
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = 5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = gamma_vals[i], # Set minimum loss reduction for split
+                     
+                     
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+  ) # Set evaluation metric to use
+  
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+best 164
+
+
+```{r}
+cbind.data.frame(gamma_vals, rmse_vec)
+```
+
+```{r}
+###### 3 - Subsample and Column sample Tuning ######
+
+# Be Careful - This can take a very long time to run
+subsample <- c(0.6, 0.7, 0.8, 0.9, 1) # Create vector of subsample values
+colsample_by_tree <- c(0.6, 0.7, 0.8, 0.9, 1) # Create vector of col sample values
+
+# Expand grid of tuning parameters
+cv_params <- expand.grid(subsample, colsample_by_tree)
+names(cv_params) <- c("subsample", "colsample_by_tree")
+# Create vectors to store results
+rmse_vec <- rep(NA, nrow(cv_params)) 
+# Loop through parameter values
+for(i in 1:nrow(cv_params)){
+  set.seed(111111)
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = 5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = 0.15, # Set minimum loss reduction for split
+                     subsample = cv_params$subsample[i], # Set proportion of training data to use in tree
+                     colsample_bytree = cv_params$colsample_by_tree[i], # Set number of variables to use in each tree
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+  ) # Set evaluation metric to use
+  
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+
+165
+
+```{r}
+res_db <- cbind.data.frame(cv_params, rmse_vec)
+names(res_db)[3] <- c("rmse") 
+res_db$subsample <- as.factor(res_db$subsample) # Convert tree number to factor for plotting
+res_db$colsample_by_tree <- as.factor(res_db$colsample_by_tree) # Convert node size to factor for plotting
+g_4 <- ggplot(res_db, aes(y = colsample_by_tree, x = subsample, fill = rmse)) + # set aesthetics
+  geom_tile() + # Use geom_tile for heatmap
+  theme_bw() + # Set theme
+  scale_fill_gradient2(low = "blue", # Choose low color
+                       mid = "white", # Choose mid color
+                       high = "red", # Choose high color
+                       midpoint =mean(res_db$rmse), # Choose mid point
+                       space = "Lab", 
+                       na.value ="grey", # Choose NA value
+                       guide = "colourbar", # Set color bar
+                       aesthetics = "fill") + # Select aesthetics to apply
+  labs(x = "Subsample", y = "Column Sample by Tree", fill = "RMSE") # Set labels
+g_4 # Generate plot
+```
+
+
+```{r}
+res_db
+```
+
+
+```{r}
+res_db[which.min(res_db$rmse),]
+```
+
+```{r}
+###### 4 - eta tuning ######
+
+# Use xgb.cv to run cross-validation inside xgboost
+set.seed(111111)
+bst_mod_1 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.3, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .15, # Set minimum loss reduction for split
+                    subsample = .9, # Set proportion of training data to use in tree
+                    colsample_bytree =  .7, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+```{r}
+set.seed(111111)
+bst_mod_2 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.1, # Set learning rate
+                    max.depth =  5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .15, # Set minimum loss reduction for split
+                    subsample = .9, # Set proportion of training data to use in tree
+                    colsample_bytree = .7, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+```{r}
+set.seed(111111)
+bst_mod_3 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.05, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .15, # Set minimum loss reduction for split
+                    subsample = .9 , # Set proportion of training data to use in tree
+                    colsample_bytree =  .7, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+
+```{r}
+set.seed(111111)
+bst_mod_4 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.01, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = 0.15, # Set minimum loss reduction for split
+                    subsample = .9, # Set proportion of training data to use in tree
+                    colsample_bytree = .7, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+
+```{r}
+set.seed(111111)
+bst_mod_5 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.005, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .15, # Set minimum loss reduction for split
+                    subsample = .9 , # Set proportion of training data to use in tree
+                    colsample_bytree = .7, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+                    
+) # Set evaluation metric to use
+```
+
+```{r}
+# Extract results for model with eta = 0.3
+pd1 <- cbind.data.frame(bst_mod_1$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.3, nrow(bst_mod_1$evaluation_log)))
+names(pd1)[3] <- "eta"
+# Extract results for model with eta = 0.1
+pd2 <- cbind.data.frame(bst_mod_2$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.1, nrow(bst_mod_2$evaluation_log)))
+names(pd2)[3] <- "eta"
+# Extract results for model with eta = 0.05
+pd3 <- cbind.data.frame(bst_mod_3$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.05, nrow(bst_mod_3$evaluation_log)))
+names(pd3)[3] <- "eta"
+# Extract results for model with eta = 0.01
+pd4 <- cbind.data.frame(bst_mod_4$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.01, nrow(bst_mod_4$evaluation_log)))
+names(pd4)[3] <- "eta"
+# Extract results for model with eta = 0.005
+pd5 <- cbind.data.frame(bst_mod_5$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.005, nrow(bst_mod_5$evaluation_log)))
+names(pd5)[3] <- "eta"
+# Join datasets
+plot_data <- rbind.data.frame(pd1, pd2, pd3, pd4, pd5)
+# Converty ETA to factor
+plot_data$eta <- as.factor(plot_data$eta)
+# Plot points
+g_6 <- ggplot(plot_data, aes(x = iter, y = test_rmse_mean, color = eta))+
+  geom_point(alpha = 0.5) +
+  theme_bw() + # Set theme
+  theme(panel.grid.major = element_blank(), # Remove grid
+        panel.grid.minor = element_blank(), # Remove grid
+        panel.border = element_blank(), # Remove grid
+        panel.background = element_blank()) + # Remove grid 
+  labs(x = "Number of Trees", title = "RMSE v Number of Trees",
+       y = "RMSE", color = "Learning \n Rate")  # Set labels
+g_6
+```
+
+
+```{r}
+set.seed(111111)
+bst_final <- xgboost(data = dtrain, # Set training data
+                     
+                     
+                     
+                     eta = .1, # Set learning rate
+                     max.depth =  5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = .15, # Set minimum loss reduction for split
+                     subsample = .9, # Set proportion of training data to use in tree
+                     colsample_bytree = .7 , # Set number of variables to use in each tree
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+                     
+) # Set evaluation metric to use
+```
+
+```{r}
+# Extract importance
+imp_mat <- xgb.importance(model = bst_final)
+# Plot importance (top 10 variables)
+xgb.plot.importance(imp_mat, top_n = 25)
+```
+
+
+
+
+```{r}
+forwards <- final_contract_tracking_playtype2 %>%
+  filter(PLAYER_POSITION == "C" |PLAYER_POSITION == "C-F" | PLAYER_POSITION == "F-C")
+```
+
+
+
+```{r}
+set.seed(11111)
+sample <- sample.split(forwards$Salary, SplitRatio = 0.7)
+nba_train_forwards  <- subset(forwards, sample == TRUE)
+nba_test_forwards   <- subset(forwards, sample == FALSE)
+
+
+
+
+```
+
+```{r}
+dtrain <- xgb.DMatrix(data = as.matrix(nba_train_forwards[,c(17:398)]), label = as.numeric(nba_train_forwards$Salary))
+
+# Create test matrix
+
+
+
+dtest <-  xgb.DMatrix(data = as.matrix(nba_test_forwards[,c(17:398)]), label = as.numeric(nba_test_forwards$Salary))
+```
+
+```{r}
+set.seed(111111)
+bst_1 <- xgboost(data = dtrain, # Set training data
+               
+               nrounds = 100, # Set number of rounds
+               
+               verbose = 1, # 1 - Prints out fit
+                print_every_n = 20) # Prints out result every 20th iteration
+```
+
+```{r}
+set.seed(111111)
+bst <- xgb.cv(data = dtrain, # Set training data
+              
+              nfold = 5, # Use 5 fold cross-validation
+               
+               eta = 0.1, # Set learning rate
+              
+               nrounds = 1000, # Set number of rounds
+               early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+               
+               verbose = 1, # 1 - Prints out fit
+               nthread = 1, # Set number of parallel threads
+               print_every_n = 20) # Prints out result every 20th iteration
+```
+
+From this we see 77 was the optimal number of iterations for our model. We use this number solely to ensure that we are doing a sufficient amount of rounds for our next tuning stages. We will set the number of iterations to 100 and include an early stop parameter of 20 for our next round of tuning.
+
+```{r}
+max_depth_vals <- c(3, 5, 7, 10, 15) # Create vector of max depth values
+min_child_weight <- c(1,3,5,7, 10, 15) # Create vector of min child values
+
+# Expand grid of parameter values
+cv_params <- expand.grid(max_depth_vals, min_child_weight)
+names(cv_params) <- c("max_depth", "min_child_weight")
+# Create results vector
+rmse_vec  <- rep(NA, nrow(cv_params)) 
+# Loop through results
+for(i in 1:nrow(cv_params)){
+  set.seed(111111)
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = cv_params$max_depth[i], # Set max depth
+                     min_child_weight = cv_params$min_child_weight[i], # Set minimum number of samples in node to split
+                     
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+                     
+  ) # Set evaluation metric to use
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+Best is 49:
+
+```{r}
+# Join results in dataset
+res_db <- cbind.data.frame(cv_params, rmse_vec)
+names(res_db)[3] <- c("rmse") 
+res_db$max_depth <- as.factor(res_db$max_depth) # Convert tree number to factor for plotting
+res_db$min_child_weight <- as.factor(res_db$min_child_weight) # Convert node size to factor for plotting
+# Print AUC heatmap
+g_2 <- ggplot(res_db, aes(y = max_depth, x = min_child_weight, fill = rmse)) + # set aesthetics
+  geom_tile() + # Use geom_tile for heatmap
+  theme_bw() + # Set theme
+  scale_fill_gradient2(low = "blue", # Choose low color
+                       mid = "white", # Choose mid color
+                       high = "red", # Choose high color
+                       midpoint =mean(res_db$rmse), # Choose mid point
+                       space = "Lab", 
+                       na.value ="grey", # Choose NA value
+                       guide = "colourbar", # Set color bar
+                       aesthetics = "fill") + # Select aesthetics to apply
+  labs(x = "Minimum Child Weight", y = "Max Depth", fill = "RMSE") # Set labels
+g_2 # Generate plot
+```
+
+```{r}
+res_db[which.min(res_db$rmse),] 
+```
+
+```{r}
+gamma_vals <- c(0, 0.05, 0.1, 0.15, 0.2) # Create vector of gamma values
+
+# Be Careful - This can take a very long time to run
+set.seed(111111)
+rmse_vec  <- rep(NA, length(gamma_vals))
+for(i in 1:length(gamma_vals)){
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = 5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = gamma_vals[i], # Set minimum loss reduction for split
+                     
+                     
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+  ) # Set evaluation metric to use
+  
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+best 164
+
+
+```{r}
+cbind.data.frame(gamma_vals, rmse_vec)
+```
+
+```{r}
+###### 3 - Subsample and Column sample Tuning ######
+
+# Be Careful - This can take a very long time to run
+subsample <- c(0.6, 0.7, 0.8, 0.9, 1) # Create vector of subsample values
+colsample_by_tree <- c(0.6, 0.7, 0.8, 0.9, 1) # Create vector of col sample values
+
+# Expand grid of tuning parameters
+cv_params <- expand.grid(subsample, colsample_by_tree)
+names(cv_params) <- c("subsample", "colsample_by_tree")
+# Create vectors to store results
+rmse_vec <- rep(NA, nrow(cv_params)) 
+# Loop through parameter values
+for(i in 1:nrow(cv_params)){
+  set.seed(111111)
+  bst_tune <- xgb.cv(data = dtrain, # Set training data
+                     
+                     nfold = 5, # Use 5 fold cross-validation
+                     
+                     eta = 0.1, # Set learning rate
+                     max.depth = 5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = 0.1, # Set minimum loss reduction for split
+                     subsample = cv_params$subsample[i], # Set proportion of training data to use in tree
+                     colsample_bytree = cv_params$colsample_by_tree[i], # Set number of variables to use in each tree
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+  ) # Set evaluation metric to use
+  
+  
+  rmse_vec[i] <- bst_tune$evaluation_log$test_rmse_mean[bst_tune$best_ntreelimit]
+  
+  
+}
+```
+
+165
+
+```{r}
+res_db <- cbind.data.frame(cv_params, rmse_vec)
+names(res_db)[3] <- c("rmse") 
+res_db$subsample <- as.factor(res_db$subsample) # Convert tree number to factor for plotting
+res_db$colsample_by_tree <- as.factor(res_db$colsample_by_tree) # Convert node size to factor for plotting
+g_4 <- ggplot(res_db, aes(y = colsample_by_tree, x = subsample, fill = rmse)) + # set aesthetics
+  geom_tile() + # Use geom_tile for heatmap
+  theme_bw() + # Set theme
+  scale_fill_gradient2(low = "blue", # Choose low color
+                       mid = "white", # Choose mid color
+                       high = "red", # Choose high color
+                       midpoint =mean(res_db$rmse), # Choose mid point
+                       space = "Lab", 
+                       na.value ="grey", # Choose NA value
+                       guide = "colourbar", # Set color bar
+                       aesthetics = "fill") + # Select aesthetics to apply
+  labs(x = "Subsample", y = "Column Sample by Tree", fill = "RMSE") # Set labels
+g_4 # Generate plot
+```
+
+
+```{r}
+res_db
+```
+
+
+```{r}
+res_db[which.min(res_db$rmse),]
+```
+
+```{r}
+###### 4 - eta tuning ######
+
+# Use xgb.cv to run cross-validation inside xgboost
+set.seed(111111)
+bst_mod_1 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.3, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .1, # Set minimum loss reduction for split
+                    subsample = .8, # Set proportion of training data to use in tree
+                    colsample_bytree =  .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+```{r}
+set.seed(111111)
+bst_mod_2 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.1, # Set learning rate
+                    max.depth =  5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .1, # Set minimum loss reduction for split
+                    subsample = .8, # Set proportion of training data to use in tree
+                    colsample_bytree = .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+```{r}
+set.seed(111111)
+bst_mod_3 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.05, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .1, # Set minimum loss reduction for split
+                    subsample = .8 , # Set proportion of training data to use in tree
+                    colsample_bytree =  .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+
+```{r}
+set.seed(111111)
+bst_mod_4 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.01, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = 0.1, # Set minimum loss reduction for split
+                    subsample = .8, # Set proportion of training data to use in tree
+                    colsample_bytree = .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+) # Set evaluation metric to use
+```
+
+
+
+```{r}
+set.seed(111111)
+bst_mod_5 <- xgb.cv(data = dtrain, # Set training data
+                    
+                    nfold = 5, # Use 5 fold cross-validation
+                    
+                    eta = 0.005, # Set learning rate
+                    max.depth = 5, # Set max depth
+                    min_child_weight = 15, # Set minimum number of samples in node to split
+                    gamma = .1, # Set minimum loss reduction for split
+                    subsample = .8 , # Set proportion of training data to use in tree
+                    colsample_bytree = .6, # Set number of variables to use in each tree
+                    
+                    nrounds = 1000, # Set number of rounds
+                    early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                    
+                    verbose = 1, # 1 - Prints out fit
+                    nthread = 1, # Set number of parallel threads
+                    print_every_n = 20 # Prints out result every 20th iteration
+                    
+) # Set evaluation metric to use
+```
+
+```{r}
+# Extract results for model with eta = 0.3
+pd1 <- cbind.data.frame(bst_mod_1$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.3, nrow(bst_mod_1$evaluation_log)))
+names(pd1)[3] <- "eta"
+# Extract results for model with eta = 0.1
+pd2 <- cbind.data.frame(bst_mod_2$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.1, nrow(bst_mod_2$evaluation_log)))
+names(pd2)[3] <- "eta"
+# Extract results for model with eta = 0.05
+pd3 <- cbind.data.frame(bst_mod_3$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.05, nrow(bst_mod_3$evaluation_log)))
+names(pd3)[3] <- "eta"
+# Extract results for model with eta = 0.01
+pd4 <- cbind.data.frame(bst_mod_4$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.01, nrow(bst_mod_4$evaluation_log)))
+names(pd4)[3] <- "eta"
+# Extract results for model with eta = 0.005
+pd5 <- cbind.data.frame(bst_mod_5$evaluation_log[,c("iter", "test_rmse_mean")], rep(0.005, nrow(bst_mod_5$evaluation_log)))
+names(pd5)[3] <- "eta"
+# Join datasets
+plot_data <- rbind.data.frame(pd1, pd2, pd3, pd4, pd5)
+# Converty ETA to factor
+plot_data$eta <- as.factor(plot_data$eta)
+# Plot points
+g_6 <- ggplot(plot_data, aes(x = iter, y = test_rmse_mean, color = eta))+
+  geom_point(alpha = 0.5) +
+  theme_bw() + # Set theme
+  theme(panel.grid.major = element_blank(), # Remove grid
+        panel.grid.minor = element_blank(), # Remove grid
+        panel.border = element_blank(), # Remove grid
+        panel.background = element_blank()) + # Remove grid 
+  labs(x = "Number of Trees", title = "RMSE v Number of Trees",
+       y = "RMSE", color = "Learning \n Rate")  # Set labels
+g_6
+```
+
+
+```{r}
+set.seed(111111)
+bst_final <- xgboost(data = dtrain, # Set training data
+                     
+                     
+                     
+                     eta = .1, # Set learning rate
+                     max.depth =  5, # Set max depth
+                     min_child_weight = 15, # Set minimum number of samples in node to split
+                     gamma = .1, # Set minimum loss reduction for split
+                     subsample = .8, # Set proportion of training data to use in tree
+                     colsample_bytree = .6 , # Set number of variables to use in each tree
+                     
+                     nrounds = 1000, # Set number of rounds
+                     early_stopping_rounds = 50, # Set number of rounds to stop at if there is no improvement
+                     
+                     verbose = 1, # 1 - Prints out fit
+                     nthread = 1, # Set number of parallel threads
+                     print_every_n = 20 # Prints out result every 20th iteration
+                     
+) # Set evaluation metric to use
+```
+
+```{r}
+# Extract importance
+imp_mat <- xgb.importance(model = bst_final)
+# Plot importance (top 10 variables)
+xgb.plot.importance(imp_mat, top_n = 25)
+```
+
+```{r}
+write.csv(final_contract_tracking_playtype2, "PlayTypeNBA.csv", row.names = FALSE)
+```
+
